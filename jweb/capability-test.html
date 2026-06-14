@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="background:#111;color:#0f0;font-family:monospace;font-size:11px;margin:4px">
+<pre id="out">testing…</pre>
+<script>
+	function report(line) {
+		document.getElementById("out").textContent += "\n" + line;
+		// Send result back to the Max patch (outlet 0) if the bridge exists.
+		if (window.max && window.max.outlet) {
+			window.max.outlet("cap", line);
+		}
+	}
+
+	document.getElementById("out").textContent = "jweb capability probe";
+	report("secureContext: " + window.isSecureContext);
+	report("showDirectoryPicker: " + ("showDirectoryPicker" in window));
+	report("getUserMedia: " + !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia));
+	report("MediaRecorder: " + (typeof MediaRecorder !== "undefined"));
+	report("enumerateDevices: " + !!(navigator.mediaDevices && navigator.mediaDevices.enumerateDevices));
+	report("userAgent: " + navigator.userAgent);
+</script>
+</body>
+</html>

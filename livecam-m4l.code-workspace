@@ -1,0 +1,27 @@
+{
+	"folders": [
+		{
+			"name": "LiveCam M4L",
+			"path": "."
+		}
+	],
+	"settings": {
+		"workbench.colorCustomizations": {
+			"titleBar.activeBackground": "#1a1a2e",
+			"titleBar.activeForeground": "#e0e0ff"
+		}
+	},
+	"extensions": {
+		"recommendations": [
+			"dbaeumer.vscode-eslint",
+			"esbenp.prettier-vscode",
+			"usernamehw.errorlens",
+			"streetsidesoftware.code-spell-checker",
+			"alefragnani.bookmarks"
+		]
+	},
+	"launch": {
+		"version": "0.2.0",
+		"configurations": []
+	}
+}

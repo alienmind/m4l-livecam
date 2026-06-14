@@ -1,0 +1,7 @@
+{
+	"files.associations": {
+		"*.maxpat": "json",
+		"*.amxd": "json",
+		"*.maxproj": "json"
+	}
+}

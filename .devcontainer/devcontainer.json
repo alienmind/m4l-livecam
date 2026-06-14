@@ -1,0 +1,43 @@
+{
+	"name": "LiveCam M4L",
+	"image": "mcr.microsoft.com/devcontainers/javascript-node:20",
+
+	"postCreateCommand": "corepack enable && pnpm install",
+
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"dbaeumer.vscode-eslint",
+				"esbenp.prettier-vscode",
+				"usernamehw.errorlens",
+				"streetsidesoftware.code-spell-checker",
+				"alefragnani.bookmarks"
+			],
+			"settings": {
+				"editor.formatOnSave": true,
+				"editor.defaultFormatter": "esbenp.prettier-vscode",
+				"editor.tabSize": 4,
+				"editor.insertSpaces": false,
+				"javascript.validate.enable": false,
+				"eslint.enable": true,
+				"files.associations": {
+					"*.maxpat": "json",
+					"*.amxd": "json",
+					"*.maxproj": "json"
+				},
+				"files.exclude": {
+					"**/*.mxo": true,
+					"**/*.mxe64": true
+				},
+				"search.exclude": {
+					"**/*.mov": true,
+					"**/*.mp4": true
+				}
+			}
+		}
+	},
+
+	"features": {},
+
+	"remoteUser": "node"
+}
