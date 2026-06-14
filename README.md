@@ -4,12 +4,12 @@ Records webcam video in sync with an Ableton Live recording session. Drop it on 
 
 ## Features
 
-- Works on **any track** — audio or MIDI. As a Max MIDI Effect it never touches your signal.
-- **Automatic**: starts and stops with the transport. Arm the track, hit record, walk away.
-- **In-device camera preview** — see what the camera sees without opening another app.
-- **Switch cameras** — one click to cycle through all connected devices.
-- **Choose your output folder once** — the choice is remembered across sessions.
-- **Portable** — unzip anywhere. No install, no config.
+- Works on **any track** (audio or MIDI). As a Max MIDI Effect it never touches your signal.
+- **Automatic**: recording starts and stops with the transport. Arm the track, hit record, walk away.
+- **In-device camera preview** to see what the camera sees without opening another app.
+- **Switch cameras** with one click to cycle through all connected devices.
+- **Choose your output folder once**. The choice is remembered across sessions.
+- **Portable**: unzip anywhere. No install, no config.
 
 ## Installation
 
@@ -29,7 +29,7 @@ Records webcam video in sync with an Ableton Live recording session. Drop it on 
 ## Using it
 
 1. **Arm** the track (Arm button in Ableton).
-2. Click the **folder icon** (bottom-left of the device panel) to pick where files are saved — you only need to do this once.
+2. Click the **folder icon** (bottom-left of the device panel) to pick where files are saved. You only need to do this once.
 
 ![Select Folder](./images/select-folder.png)
 
@@ -86,9 +86,9 @@ Then import the MP4 and audio file into your editor.
 
 ## Notes
 
-- **Output folder** cannot be auto-set to Ableton's project folder (browser sandbox limitation). Pick a folder once — it's remembered via IndexedDB.
-- **Webcam is single-consumer.** While editing the Max patch, two instances of the device compete for the camera. The live track device wins; the editor shows "could not start video source". That's expected.
-- **WebM only** — what `MediaRecorder` produces natively.
+- **Output folder**: Cannot be auto-set to Ableton's project folder due to browser sandbox limitations. Pick a folder once and it's remembered via IndexedDB.
+- **Webcam is single-consumer**: While editing the Max patch, two instances of the device compete for the camera. The live track device wins; the editor shows "could not start video source". That's expected.
+- **WebM only**: The format that `MediaRecorder` produces natively.
 
 ## Requirements
 
@@ -96,9 +96,9 @@ Then import the MP4 and audio file into your editor.
 
 ## Get the plugin
 
-LiveCam is available on **Gumroad**: [alienmindzzz.gumroad.com/l/livecam](https://alienmindzzz.gumroad.com/l/livecam)
+LiveCam is available on Gumroad: [alienmindzzz.gumroad.com/l/livecam](https://alienmindzzz.gumroad.com/l/livecam)
 
-The source code here is free and open-source (MIT). If you'd like to support development, consider buying it on Gumroad — think of it as buying me a coffee! ☕
+The source code is free and open-source under MIT. If you'd like to support development, consider buying it on Gumroad—think of it as buying me a coffee! ☕
 
 ## License
 
