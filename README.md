@@ -90,6 +90,10 @@ Then import the MP4 and audio file into your editor.
 
 - Ableton Live **Suite** 12.4+ (includes Max for Live / Max 9)
 
+## License
+
+MIT — see [LICENSE](./LICENSE) for details.
+
 ---
 
 More info: [livecam.alienmind.io](https://livecam.alienmind.io)

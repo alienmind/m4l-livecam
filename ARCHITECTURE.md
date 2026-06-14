@@ -1,6 +1,6 @@
 # LiveCam — Architecture & Developer Guide
 
-This document covers everything needed to understand, build, and maintain the LiveCam device from source. The source repository is private.
+This document covers everything needed to understand, build, and maintain the LiveCam device from source. The project is open source under the MIT license.
 
 ---
 
