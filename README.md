@@ -90,6 +90,12 @@ Then import the MP4 and audio file into your editor.
 
 - Ableton Live **Suite** 12.4+ (includes Max for Live / Max 9)
 
+## Get the plugin
+
+LiveCam is available on **Gumroad**: [alienmindzzz.gumroad.com/l/livecam](https://alienmindzzz.gumroad.com/l/livecam)
+
+The source code here is free and open-source (MIT). If you'd like to support development, consider buying it on Gumroad — think of it as buying me a coffee! ☕
+
 ## License
 
 MIT — see [LICENSE](./LICENSE) for details.

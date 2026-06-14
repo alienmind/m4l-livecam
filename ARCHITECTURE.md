@@ -2,6 +2,8 @@
 
 This document covers everything needed to understand, build, and maintain the LiveCam device from source. The project is open source under the MIT license.
 
+**Get the pre-built plugin:** [alienmindzzz.gumroad.com/l/livecam](https://alienmindzzz.gumroad.com/l/livecam) — buy me a coffee! ☕
+
 ---
 
 ## Overview
