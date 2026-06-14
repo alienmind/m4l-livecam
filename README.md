@@ -30,10 +30,14 @@ Records webcam video in sync with an Ableton Live recording session. Drop it on 
 
 1. **Arm** the track (Arm button in Ableton).
 2. Click the **folder icon** (bottom-left of the device panel) to pick where files are saved — you only need to do this once.
-3. Press **global Record** + **Play** in the Ableton transport.
+
+![Select Folder](./images/select-folder.png)
+
+3. **On first use**, your browser may ask for permission to access your webcam — **accept this request** to enable video capture.
+4. Press **global Record** + **Play** in the Ableton transport.
    LiveCam starts recording automatically when the track is armed and recording.
-4. Stop the transport. The `.webm` file is written immediately.
-5. **Export your audio track** from Ableton (File → Export Audio) to sync with the video.
+5. Stop the transport. The `.webm` file is written immediately.
+6. **Export your audio track** from Ableton (File → Export Audio) to sync with the video.
 
 ### Putting it together
 
