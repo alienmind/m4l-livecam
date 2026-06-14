@@ -86,6 +86,7 @@ Then import the MP4 and audio file into your editor.
 
 ## Notes
 
+- **Video only**: This plugin records video from your webcam only. Audio must be exported separately from Ableton and combined in your video editor.
 - **Output folder**: Cannot be auto-set to Ableton's project folder due to browser sandbox limitations. Pick a folder once and it's remembered via IndexedDB.
 - **Webcam is single-consumer**: While editing the Max patch, two instances of the device compete for the camera. The live track device wins; the editor shows "could not start video source". That's expected.
 - **WebM only**: The format that `MediaRecorder` produces natively.
