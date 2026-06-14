@@ -24,6 +24,8 @@ Records webcam video in sync with an Ableton Live recording session. Drop it on 
 3. In Ableton, open the browser (**B**) and navigate to the unzipped folder.
 4. Drag **LiveCam.amxd** onto any track.
 
+![Installation in Ableton](./images/installation.png)
+
 ## Using it
 
 1. **Arm** the track (Arm button in Ableton).
@@ -31,6 +33,15 @@ Records webcam video in sync with an Ableton Live recording session. Drop it on 
 3. Press **global Record** + **Play** in the Ableton transport.
    LiveCam starts recording automatically when the track is armed and recording.
 4. Stop the transport. The `.webm` file is written immediately.
+5. **Export your audio track** from Ableton (File → Export Audio) to sync with the video.
+
+### Putting it together
+
+You now have two files:
+- **livecam_*.webm** — your video file (from LiveCam)
+- **your-track.wav/mp3** — your audio file (exported from Ableton)
+
+Drag both files into any video editing tool (DaVinci Resolve, Premiere Pro, CapCut, etc.) and sync them by timeline. Most modern editors support WebM natively.
 
 ### Controls at a glance
 
@@ -43,6 +54,8 @@ Records webcam video in sync with an Ableton Live recording session. Drop it on 
 | Red ring | Panel border | Visible while recording |
 | Status pill | Bottom | Ready / REC / Saved … / error |
 
+![Device Controls](./images/controls.png)
+
 Double-click the **LiveCam** title (top-left) to open the About screen.
 
 ## Output
@@ -53,10 +66,19 @@ Files are saved as **WebM** (VP8/VP9) using your browser's `MediaRecorder`. File
 livecam_20240101_120000.webm
 ```
 
-To convert to MP4:
+Import this file and your exported audio into your video editor. WebM is widely supported in modern editing tools.
+
+### Advanced: Convert to MP4
+
+If your video editor doesn't support WebM, convert it using FFmpeg:
+
 ```bash
 ffmpeg -i livecam_20240101_120000.webm -c copy output.mp4
 ```
+
+Then import the MP4 and audio file into your editor.
+
+![Recording Example](./images/recording-example.png)
 
 ## Notes
 
