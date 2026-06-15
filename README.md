@@ -33,6 +33,10 @@ Records webcam video in sync with an Ableton Live recording session. Drop it on 
 
 ![Select Folder](./images/select-folder.png)
 
+   The browser will ask for permission to edit files in the selected folder first time you instantiate this device - click **Edit files** to allow it.
+
+![Allow Edit Files](./images/accept.png)
+
 3. **On first use**, your browser may ask for permission to access your webcam — **accept this request** to enable video capture.
 4. Press **global Record** + **Play** in the Ableton transport.
    LiveCam starts recording automatically when the track is armed and recording.
