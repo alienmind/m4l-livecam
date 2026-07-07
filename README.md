@@ -17,12 +17,12 @@ Records webcam video in sync with an Ableton Live recording session. Drop it on 
 2. Unzip it. Keep the three files together:
    ```
    LiveCam/
-   ├── LiveCam.amxd
-   ├── livecam.js
+   ├── ableton-template.amxd
+   ├── wrapper.js
    └── livecam-ui.html
    ```
 3. In Ableton, open the browser (**B**) and navigate to the unzipped folder.
-4. Drag **LiveCam.amxd** onto any track.
+4. Drag **ableton-template.amxd** onto any track.
 
 ![Installation in Ableton](./images/installation.png)
 
@@ -104,6 +104,24 @@ Then import the MP4 and audio file into your editor.
 LiveCam is available on Gumroad: [alienmindzzz.gumroad.com/l/livecam](https://alienmindzzz.gumroad.com/l/livecam)
 
 The source code is free and open-source under MIT. If you'd like to support development, consider buying it on Gumroad—think of it as buying me a coffee! ☕
+
+## Creating (or Recreating) `ableton-template.amxd`
+
+The `.amxd` file is a Max for Live wrapper patcher. If you need to recreate it from scratch:
+1. In Ableton Live, drag a default **Max MIDI Effect** onto any track.
+2. Click the device's **Edit** button (looks like a plug/slider or check device menu) to open Max.
+3. In the Max editor, delete all default/placeholder objects.
+4. Press `n` to create a new object box and type:
+   - `live.thisdevice`
+   - `js wrapper.js`
+   - `jweb @enablejavascript 1`
+5. Connect them:
+   - Connect the outlet of `live.thisdevice` to the inlet of `js wrapper.js`.
+   - Connect the first outlet of `js wrapper.js` to the inlet of `jweb`.
+6. Open the `jweb` Inspector, locate the **Initial URL** attribute, and set it to `about:blank`.
+7. Right-click the `jweb` object and select **Add to Presentation**.
+8. Go to Presentation mode and resize the `jweb` frame to fill the device panel (typically 320x180 px).
+9. Save the device as `ableton-template.amxd` in the `ableton-amxd/` folder.
 
 ## License
 

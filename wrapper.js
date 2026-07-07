@@ -1,5 +1,5 @@
 /**
- * livecam.js — Max-side glue (NOT the React app).
+ * wrapper.js — Max-side glue (NOT the React app).
  *
  * Runs in Max's [js] object. Uses LiveAPI to observe whether THIS track is
  * actively recording, and forwards a single "record 1" / "record 0" message
@@ -18,8 +18,8 @@ inlets = 1;
 outlets = 2;
 
 // Liveness banner — prints the moment the script (re)loads. If you don't see
-// this in the Max Console, the [js livecam.js] object isn't in the device.
-post("livecam.js loaded\n");
+// this in the Max Console, the [js wrapper.js] object isn't in the device.
+post("wrapper.js loaded\n");
 
 var isArmed = 0;
 var isPlaying = 0;
@@ -77,7 +77,7 @@ function teardown() {
 // (Harmless if the jweb Initial URL is already set to an absolute path.)
 function loadWebview() {
 	try {
-		var fp = this.patcher.filepath; // e.g. C:/Users/.../LiveCam.amxd
+		var fp = this.patcher.filepath; // e.g. C:/Users/.../ableton-template.amxd
 		if (!fp || !fp.length) {
 			post("livecam: patcher not saved yet — UI path unknown\n");
 			return;

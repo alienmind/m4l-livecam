@@ -14,7 +14,7 @@ LiveCam is a **Max for Live MIDI Effect** that records webcam video in sync with
 Ableton track (armed)
         │  arm / is_playing / record_mode   (Live Object Model)
         ▼
-[live.thisdevice] → [js livecam.js] ──"record 1/0"──▶ [jweb] ─loads─▶ React app
+[live.thisdevice] → [js wrapper.js] ──"record 1/0"──▶ [jweb] ─loads─▶ React app
         │                                                               │
         └─ on load: derives file:// URL from own path                  ├─ getUserMedia → preview + capture
            and tells jweb which HTML file to load                      ├─ enumerateDevices → switch camera
@@ -26,7 +26,7 @@ Ableton track (armed)
 
 | World | File | Runtime | APIs available |
 |---|---|---|---|
-| Max-side | `livecam.js` | Max's `[js]` object (ES5) | LiveAPI, `post()`, `outlet()` — **no** browser APIs |
+| Max-side | `wrapper.js` | Max's `[js]` object (ES5) | LiveAPI, `post()`, `outlet()` — **no** browser APIs |
 | Browser-side | `src/` → built `livecam-ui.html` | jweb (Chromium / CEF) | Full browser APIs — **no** Max/LiveAPI globals |
 
 They communicate only through `outlet(0, "record", 1/0)` on the Max side and `window.max.bindInlet("record", cb)` in the browser.
@@ -38,8 +38,8 @@ They communicate only through `outlet(0, "record", 1/0)` on the Max side and `wi
 ```
 livecam-m4l/
 ├── ableton-amxd/
-│   └── LiveCam.amxd          ← SOURCE .amxd (tracked in git; built in Ableton)
-├── livecam.js                 ← Max glue script (tracked in git; copied to dist/ on build)
+│   └── ableton-template.amxd  ← SOURCE .amxd (tracked in git; built in Ableton)
+├── wrapper.js                 ← Max glue script (tracked in git; copied to dist/ on build)
 ├── src/                       ← React app source
 │   ├── App.tsx                    root component; orchestrates all hooks; About panel toggle
 │   ├── vite-env.d.ts              declares __APP_VERSION__ injected at build time
@@ -71,8 +71,8 @@ livecam-m4l/
 ├── tsconfig.json
 ├── .github/workflows/deploy.yml   GitHub Pages CI (deploys dist/doc/ on push to main)
 └── dist/                      ← FULLY GENERATED — gitignored; never edit here
-    ├── LiveCam.amxd               copied from ableton-amxd/
-    ├── livecam.js                 copied from root livecam.js
+    ├── ableton-template.amxd      copied from ableton-amxd/
+    ├── wrapper.js                 copied from root wrapper.js
     ├── livecam-ui.html            Vite build output (viteSingleFile, single ~350KB HTML)
     └── doc/
         ├── index.html             static project page (rendered from README.md)
@@ -90,13 +90,13 @@ tsc -b              → type-check (noEmit)
 vite build          → builds src/ → dist/index.html (single inlined HTML via viteSingleFile)
 node scripts/postbuild.mjs
   ├── rename dist/index.html → dist/livecam-ui.html
-  ├── copy ableton-amxd/LiveCam.amxd → dist/LiveCam.amxd
-  ├── copy livecam.js → dist/livecam.js
+  ├── copy ableton-amxd/ableton-template.amxd → dist/ableton-template.amxd
+  ├── copy wrapper.js → dist/wrapper.js
   ├── build-docs: README.md → dist/doc/index.html + CNAME
   └── create livecam-dist.zip (LiveCam/{amxd,js,html})
 ```
 
-`dist/` is emptied by Vite at the start of every build (`emptyOutDir: true`). This is safe because neither the `.amxd` nor `livecam.js` live there as source files anymore.
+`dist/` is emptied by Vite at the start of every build (`emptyOutDir: true`). This is safe because neither the `.amxd` nor `wrapper.js` live there as source files anymore.
 
 ### Key Vite settings
 
@@ -122,15 +122,15 @@ Standalone: re-renders `dist/doc/index.html` from `README.md` without a full bui
 
 ---
 
-## How `livecam.js` works (Max-side)
+## How `wrapper.js` works (Max-side)
 
 The script runs in the Max `[js]` object. Entry points are `bang()` (from `live.thisdevice`) and `loadbang()`. Both call `setup()`:
 
-1. **`loadWebview()`** — reads `this.patcher.filepath` (the absolute path to `LiveCam.amxd`), strips the filename, and builds a `file:///…/livecam-ui.html` URL. Sends it to outlet 0 which connects to `[jweb]`. This is how the device finds its UI without any hardcoded path.
+1. **`loadWebview()`** — reads `this.patcher.filepath` (the absolute path to `ableton-template.amxd`), strips the filename, and builds a `file:///…/livecam-ui.html` URL. Sends it to outlet 0 which connects to `[jweb]`. This is how the device finds its UI without any hardcoded path.
 
 2. **Three LiveAPI observers** — one on `this_device canonical_parent` for `arm`, two on `live_set` for `is_playing` and `record_mode`. The recording condition is all three truthy simultaneously. Any change re-evaluates and emits `record 1` or `record 0` to outlet 0.
 
-`autowatch = 1` means Max hot-reloads the script whenever `livecam.js` changes on disk — no need to restart Ableton during development.
+`autowatch = 1` means Max hot-reloads the script whenever `wrapper.js` changes on disk — no need to restart Ableton during development.
 
 ---
 
@@ -138,7 +138,7 @@ The script runs in the Max `[js]` object. Entry points are `bang()` (from `live.
 
 jweb is Max's embedded Chromium (CEF). Important properties:
 - `@enablejavascript 1` — required.
-- `Initial URL` in Inspector — set to `about:blank`; `livecam.js` navigates it via `outlet(0, "url", derivedUrl)`.
+- `Initial URL` in Inspector — set to `about:blank`; `wrapper.js` navigates it via `outlet(0, "url", derivedUrl)`.
 - **`file://` is a secure context** in this Max build (Chrome 135 / Max 9 on Windows). `getUserMedia`, `showDirectoryPicker`, `MediaRecorder`, `enumerateDevices` all work from `file://` origin. No dev server needed at runtime.
 
 The bridge (`src/lib/maxBridge.ts`) wraps `window.max.bindInlet` and `window.max.outlet` with browser-environment no-ops so the same code runs in a dev browser tab.
@@ -147,30 +147,30 @@ The bridge (`src/lib/maxBridge.ts`) wraps `window.max.bindInlet` and `window.max
 
 ## How to create (or recreate) the `.amxd`
 
-The `.amxd` is a binary file saved from within Ableton. You can't create it from the command line. If `ableton-amxd/LiveCam.amxd` is lost:
+The `.amxd` is a binary file saved from within Ableton. You can't create it from the command line. If `ableton-amxd/ableton-template.amxd` is lost:
 
 1. In Ableton, create a new **Max MIDI Effect** device on any track.
 2. Click the device's **`…` menu → Edit in Max**. The Max editor opens (mini window inside Ableton).
 3. Delete any default placeholder objects.
 4. Add three objects (press **`n`**, type, click away or press Enter):
    - `live.thisdevice`
-   - `js livecam.js`
+   - `js wrapper.js`
    - `jweb @enablejavascript 1`
 5. Wire them:
-   - `live.thisdevice` outlet 0 → `js livecam.js` inlet 0
-   - `js livecam.js` outlet 0 → `jweb` inlet 0
+   - `live.thisdevice` outlet 0 → `js wrapper.js` inlet 0
+   - `js wrapper.js` outlet 0 → `jweb` inlet 0
 6. Open the `jweb` Inspector (`Ctrl+I`). Set **Initial URL** to `about:blank`.
 7. Right-click `jweb` → **Add to Presentation**. Switch to Presentation view (`Ctrl+Alt+E`). Resize `jweb` to fill the device panel (the device is 320×180 px).
-8. **File → Save** — save as `LiveCam.amxd` inside the `ableton-amxd/` folder.
+8. **File → Save** — save as `ableton-template.amxd` inside the `ableton-amxd/` folder.
 9. Open **Window → Max Console** and confirm you see:
    ```
-   livecam.js loaded
+   wrapper.js loaded
    livecam: loadbang
    livecam: sent url file:///…/ableton-amxd/livecam-ui.html
    livecam: observers ready
    ```
 
-> **Note:** the `.amxd` must be in the same folder as `livecam.js` and `livecam-ui.html` at runtime. During development it's fine to keep it in `ableton-amxd/` alongside the source `livecam.js` copied there manually, or just use `dist/` after a `pnpm build`.
+> **Note:** the `.amxd` must be in the same folder as `wrapper.js` and `livecam-ui.html` at runtime. During development it's fine to keep it in `ableton-amxd/` alongside the source `wrapper.js` copied there manually, or just use `dist/` after a `pnpm build`.
 
 > **Never "Freeze"** the device (the snowflake icon). Max's Freeze is unreliable with `jweb` — the embedded web page often fails to load. Always distribute as a folder of three files.
 
@@ -195,7 +195,7 @@ This mirrors Ableton's actual recording state: a track only records when it's ar
 Run `pnpm build`. This produces:
 
 - `dist/` — the device folder (three files)
-- `livecam-dist.zip` — `LiveCam/{LiveCam.amxd, livecam.js, livecam-ui.html}`
+- `livecam-dist.zip` — `LiveCam/{ableton-template.amxd, wrapper.js, livecam-ui.html}`
 - `dist/doc/` — the static project website
 
 Attach `livecam-dist.zip` to a GitHub Release. Recipients unzip it anywhere — the path is derived at runtime, so it works on any machine as long as the three files stay together.

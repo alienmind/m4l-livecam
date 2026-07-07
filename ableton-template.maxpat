@@ -34,7 +34,7 @@
 				"box" : {
 					"id" : "obj-js",
 					"maxclass" : "js",
-					"text" : "js livecam.js",
+					"text" : "js wrapper.js",
 					"numinlets" : 1,
 					"numoutlets" : 2,
 					"outlettype" : [ "", "" ],
@@ -93,7 +93,7 @@
 		],
 		"dependency_cache" : [
 			{
-				"name" : "livecam.js",
+				"name" : "wrapper.js",
 				"bootpath" : "~/src/livecam-m4l/js",
 				"type" : "TEXT",
 				"implicit" : 1
