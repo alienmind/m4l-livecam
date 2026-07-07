@@ -112,11 +112,34 @@ function onRec(a) {
 	}
 }
 
+// The three observers (arm / is_playing / record_mode) fire as separate,
+// non-atomic callbacks when the transport starts, so the combined condition can
+// briefly flap true→false→true. Debounce with a 150 ms settle so only the final
+// state is emitted — otherwise a transient "record 1" then "record 0" makes the
+// UI start and immediately stop, writing an empty clip.
+var settleTask = null;
+var pendingRecord = -1;
+
 function evaluate() {
 	var shouldRecord = isArmed && isPlaying && isRecordMode ? 1 : 0;
-	if (shouldRecord !== recording) {
-		recording = shouldRecord;
-		outlet(0, "record", recording);
-		post("livecam: record " + recording + "\n");
+	if (shouldRecord === recording) {
+		// Settled back to what we already emitted — cancel any pending flip.
+		if (settleTask) {
+			settleTask.cancel();
+			settleTask = null;
+		}
+		return;
 	}
+	pendingRecord = shouldRecord;
+	if (settleTask) settleTask.cancel();
+	settleTask = new Task(emitRecord, this);
+	settleTask.schedule(150);
+}
+
+function emitRecord() {
+	settleTask = null;
+	if (pendingRecord === recording) return;
+	recording = pendingRecord;
+	outlet(0, "record", recording);
+	post("livecam: record " + recording + "\n");
 }

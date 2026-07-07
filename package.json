@@ -1,7 +1,7 @@
 {
 	"name": "livecam-m4l",
 	"private": true,
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"type": "module",
 	"packageManager": "pnpm@10.0.0",
 	"description": "Max for Live device — camera capture synced to Ableton track recording, rendered as a React app inside jweb",

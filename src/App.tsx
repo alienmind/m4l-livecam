@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Circle, SwitchCamera } from "lucide-react";
 import { AboutPanel } from "@/components/AboutPanel";
 import { CameraPreview } from "@/components/CameraPreview";
@@ -38,18 +38,24 @@ export default function App() {
 		onComplete: handleComplete,
 	});
 
+	// Keep a stable ref to the latest recorder so the inlet binding below can be
+	// registered exactly once (rebinding every render can accumulate duplicate
+	// jweb handlers, causing doubled record signals).
+	const recorderRef = useRef(recorder);
+	recorderRef.current = recorder;
+
 	// Bridge: the patch sends `record 1` / `record 0` from the LOM observer.
 	useEffect(() => {
 		bindInlet("record", (...args) => {
 			const on = Number(args[0]) === 1;
 			if (on) {
-				recorder.start();
+				recorderRef.current.start();
 				outlet("status", "recording");
 			} else {
-				recorder.stop();
+				recorderRef.current.stop();
 			}
 		});
-	}, [recorder]);
+	}, []);
 
 	const activeCam = camera.devices[camera.activeIndex];
 	const camLabel = activeCam?.label || `Camera ${camera.activeIndex + 1}`;

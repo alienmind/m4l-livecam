@@ -40,10 +40,15 @@ export function useRecorder({ getStream, onComplete }: UseRecorderArgs) {
 			if (e.data.size > 0) chunksRef.current.push(e.data);
 		};
 		rec.onstop = () => {
-			const blob = new Blob(chunksRef.current, { type: mimeType });
+			const chunks = chunksRef.current;
 			chunksRef.current = [];
 			recorderRef.current = null;
 			setIsRecording(false);
+			// A transient start/stop (record signal flapping 1→0→1) can fire
+			// onstop before any data arrived. Don't write a zero-byte file.
+			if (chunks.length === 0) return;
+			const blob = new Blob(chunks, { type: mimeType });
+			if (blob.size === 0) return;
 			void onComplete(blob, "webm");
 		};
 
