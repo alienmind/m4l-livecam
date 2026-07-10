@@ -105,22 +105,43 @@ function resolveUiUrl() {
 		return null;
 	}
 	var target = devFolder + "/" + UI_NAME;
-	if (typeof UI_PAYLOAD_B64 !== "undefined") {
-		extractPayloadIfNeeded(target);
-	} else {
+	if (typeof UI_PAYLOAD_B64 === "undefined") {
 		post("livecam: no embedded payload (dev build) - using " + target + "\n");
+		return encodeURI("file:///" + target);
 	}
-	return encodeURI("file:///" + target);
+	var actual = ensureUiFile(devFolder, target);
+	return encodeURI("file:///" + (actual || target));
 }
 
-/** Write the embedded payload to targetPath unless an identical-size copy exists. */
-function extractPayloadIfNeeded(targetPath) {
+function sameFolder(a, b) {
+	if (!a || !b) return false;
+	a = String(a).replace(/\\/g, "/").toLowerCase();
+	b = String(b).replace(/\\/g, "/").toLowerCase();
+	if (a.charAt(a.length - 1) === "/") a = a.slice(0, -1);
+	if (b.charAt(b.length - 1) === "/") b = b.slice(0, -1);
+	return a === b;
+}
+
+/**
+ * Make sure the UI html exists next to the device and return its real path.
+ *
+ * CAUTION: Max's File() falls back to search-path resolution by basename, so
+ * opening an absolute path can silently answer with a same-named file from a
+ * completely different folder (e.g. the repo's dist/ during development).
+ * Every check below therefore validates File.foldername against the device
+ * folder before trusting the probe.
+ */
+function ensureUiFile(devFolder, targetPath) {
 	try {
 		var existing = new File(targetPath);
 		if (existing.isopen) {
 			var sameSize = existing.eof === UI_PAYLOAD_BYTES;
+			var samePlace = sameFolder(existing.foldername, devFolder);
 			existing.close();
-			if (sameSize) return; // already extracted, same build
+			if (sameSize && samePlace) {
+				post("livecam: UI already extracted at " + targetPath + "\n");
+				return targetPath;
+			}
 		}
 	} catch (e) {
 		/* fall through to (re)write */
@@ -130,7 +151,7 @@ function extractPayloadIfNeeded(targetPath) {
 		if (!out.isopen) out.open();
 		if (!out.isopen) {
 			post("livecam: cannot write " + targetPath + "\n");
-			return;
+			return null;
 		}
 		out.eof = 0;
 		var bytes = [];
@@ -150,14 +171,24 @@ function extractPayloadIfNeeded(targetPath) {
 		out.close();
 		var check = new File(targetPath);
 		var written = check.isopen ? check.eof : -1;
+		var where = check.isopen ? String(check.foldername) : "";
 		if (check.isopen) check.close();
-		if (written === UI_PAYLOAD_BYTES) {
+		if (written === UI_PAYLOAD_BYTES && sameFolder(where, devFolder)) {
 			post("livecam: extracted UI (" + written + " bytes) to " + targetPath + "\n");
-		} else {
-			post("livecam: extract SIZE MISMATCH - wrote " + written + ", expected " + UI_PAYLOAD_BYTES + "\n");
+			return targetPath;
 		}
+		if (written === UI_PAYLOAD_BYTES) {
+			// The write was redirected by path resolution; the file is intact
+			// but lives elsewhere - point jweb at where it really is.
+			var real = where.replace(/\\/g, "/").replace(/\/$/, "") + "/" + UI_NAME;
+			post("livecam: WARNING - UI landed in " + real + " (search-path redirect)\n");
+			return real;
+		}
+		post("livecam: extract SIZE MISMATCH - wrote " + written + " in '" + where + "', expected " + UI_PAYLOAD_BYTES + "\n");
+		return null;
 	} catch (e2) {
 		post("livecam: extract failed - " + e2.message + "\n");
+		return null;
 	}
 }
 
