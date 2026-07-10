@@ -131,14 +131,19 @@ function extractPayloadIfNeeded(targetPath) {
 			return;
 		}
 		out.eof = 0;
+		var bytes = [];
+		for (var i = 0; i < UI_PAYLOAD_B64.length; i++) {
+			var part = b64decode(UI_PAYLOAD_B64[i]);
+			for (var p = 0; p < part.length; p++) bytes.push(part[p]);
+		}
+		if (typeof UI_PAYLOAD_DEFLATE !== "undefined" && UI_PAYLOAD_DEFLATE) {
+			bytes = inflateRaw(bytes);
+		}
 		// File.writebytes silently truncates large calls (observed 16384-byte
 		// cap), so write in small slices.
 		var SLICE = 4096;
-		for (var i = 0; i < UI_PAYLOAD_B64.length; i++) {
-			var bytes = b64decode(UI_PAYLOAD_B64[i]);
-			for (var off = 0; off < bytes.length; off += SLICE) {
-				out.writebytes(bytes.slice(off, off + SLICE));
-			}
+		for (var off = 0; off < bytes.length; off += SLICE) {
+			out.writebytes(bytes.slice(off, off + SLICE));
 		}
 		out.close();
 		var check = new File(targetPath);
@@ -152,6 +157,151 @@ function extractPayloadIfNeeded(targetPath) {
 	} catch (e2) {
 		post("livecam: extract failed - " + e2.message + "\n");
 	}
+}
+
+/**
+ * Minimal raw-DEFLATE (RFC 1951) decoder, "puff"-style. The build compresses
+ * the UI payload with zlib deflateRaw; this inflates it back to exact bytes.
+ * ES5 only - Max's js object has no zlib/atob.
+ */
+function inflateRaw(src) {
+	var pos = 0;
+	var bitbuf = 0;
+	var bitcnt = 0;
+	var out = [];
+
+	function bits(need) {
+		while (bitcnt < need) {
+			if (pos >= src.length) throw new Error("inflate: out of input");
+			bitbuf |= src[pos++] << bitcnt;
+			bitcnt += 8;
+		}
+		var val = bitbuf & ((1 << need) - 1);
+		bitbuf >>>= need;
+		bitcnt -= need;
+		return val;
+	}
+
+	function construct(lengths, n) {
+		var h = { count: [], symbol: [] };
+		var len, i;
+		for (len = 0; len <= 15; len++) h.count[len] = 0;
+		for (i = 0; i < n; i++) h.count[lengths[i]]++;
+		h.count[0] = 0;
+		var offs = [0, 0];
+		for (len = 1; len <= 15; len++) offs[len + 1] = offs[len] + h.count[len];
+		for (i = 0; i < n; i++) if (lengths[i]) h.symbol[offs[lengths[i]]++] = i;
+		return h;
+	}
+
+	function decode(h) {
+		var code = 0;
+		var first = 0;
+		var index = 0;
+		for (var len = 1; len <= 15; len++) {
+			code |= bits(1);
+			var count = h.count[len];
+			if (code - first < count) return h.symbol[index + (code - first)];
+			index += count;
+			first = (first + count) << 1;
+			code <<= 1;
+		}
+		throw new Error("inflate: bad code");
+	}
+
+	var LENS = [3,4,5,6,7,8,9,10,11,13,15,17,19,23,27,31,35,43,51,59,67,83,99,115,131,163,195,227,258];
+	var LEXT = [0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0];
+	var DISTS = [1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577];
+	var DEXT = [0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13];
+
+	function codes(lencode, distcode) {
+		while (true) {
+			var sym = decode(lencode);
+			if (sym < 256) {
+				out.push(sym);
+			} else if (sym === 256) {
+				return;
+			} else {
+				sym -= 257;
+				var len = LENS[sym] + bits(LEXT[sym]);
+				var dsym = decode(distcode);
+				var dist = DISTS[dsym] + bits(DEXT[dsym]);
+				var from = out.length - dist;
+				if (from < 0) throw new Error("inflate: bad distance");
+				for (var k = 0; k < len; k++) out.push(out[from + k]);
+			}
+		}
+	}
+
+	var fixedLen = null;
+	var fixedDist = null;
+
+	function fixed() {
+		if (!fixedLen) {
+			var lengths = [];
+			var i;
+			for (i = 0; i < 144; i++) lengths[i] = 8;
+			for (; i < 256; i++) lengths[i] = 9;
+			for (; i < 280; i++) lengths[i] = 7;
+			for (; i < 288; i++) lengths[i] = 8;
+			fixedLen = construct(lengths, 288);
+			var dl = [];
+			for (i = 0; i < 30; i++) dl[i] = 5;
+			fixedDist = construct(dl, 30);
+		}
+		codes(fixedLen, fixedDist);
+	}
+
+	var ORDER = [16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15];
+
+	function dynamic() {
+		var nlen = bits(5) + 257;
+		var ndist = bits(5) + 1;
+		var ncode = bits(4) + 4;
+		var lengths = [];
+		var i;
+		for (i = 0; i < 19; i++) lengths[ORDER[i]] = 0;
+		for (i = 0; i < ncode; i++) lengths[ORDER[i]] = bits(3);
+		var lencode = construct(lengths, 19);
+		lengths = [];
+		i = 0;
+		while (i < nlen + ndist) {
+			var sym = decode(lencode);
+			if (sym < 16) {
+				lengths[i++] = sym;
+			} else if (sym === 16) {
+				var prev = lengths[i - 1];
+				var rep = 3 + bits(2);
+				while (rep--) lengths[i++] = prev;
+			} else if (sym === 17) {
+				var rep2 = 3 + bits(3);
+				while (rep2--) lengths[i++] = 0;
+			} else {
+				var rep3 = 11 + bits(7);
+				while (rep3--) lengths[i++] = 0;
+			}
+		}
+		codes(construct(lengths, nlen), construct(lengths.slice(nlen), ndist));
+	}
+
+	function stored() {
+		bitbuf = 0;
+		bitcnt = 0;
+		var len = src[pos] | (src[pos + 1] << 8);
+		pos += 4; // skip LEN + NLEN
+		for (var i = 0; i < len; i++) out.push(src[pos++]);
+	}
+
+	var last;
+	do {
+		last = bits(1);
+		var type = bits(2);
+		if (type === 0) stored();
+		else if (type === 1) fixed();
+		else if (type === 2) dynamic();
+		else throw new Error("inflate: bad block type");
+	} while (!last);
+	return out;
 }
 
 var B64CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
