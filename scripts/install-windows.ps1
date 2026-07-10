@@ -8,7 +8,7 @@
 # involved - Live keeps all of this in plain config files.
 $ErrorActionPreference = "Stop"
 $folderName = "LiveCam-M4L"
-$deviceFile = "livecam-m4l.amxd"
+$deviceFile = "alienmind-livecam-m4l.amxd"
 
 # Source: ./LiveCam next to this script (zip layout) or ../dist (repo layout).
 $src = Join-Path $PSScriptRoot "LiveCam"

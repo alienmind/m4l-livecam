@@ -3,7 +3,7 @@
 # User Library (Max For Live/LiveCam-M4L), replacing any previous install.
 set -eu
 folder_name="LiveCam-M4L"
-device_file="livecam-m4l.amxd"
+device_file="alienmind-livecam-m4l.amxd"
 script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 
 # Source: ./LiveCam next to this script (zip layout) or ../dist (repo layout).

@@ -25,7 +25,7 @@ console.log("postbuild: dist/index.html → dist/livecam-ui.html");
 // 2. Generate the self-contained .amxd (embeds livecam-ui.html + wrapper.js)
 execFileSync(process.execPath, [
 	path.join(root, "scripts", "build-amxd.mjs"),
-	path.join(dist, "livecam-m4l.amxd"),
+	path.join(dist, "alienmind-livecam-m4l.amxd"),
 ], { stdio: "inherit" });
 
 // 3. Copy wrapper.js from root (source file, not in dist/ anymore)
@@ -43,8 +43,8 @@ await new Promise((resolve, reject) => {
 	output.on("close", resolve);
 	archive.on("error", reject);
 	archive.pipe(output);
-	archive.append(createReadStream(path.join(dist, "livecam-m4l.amxd")), {
-		name: "LiveCam/livecam-m4l.amxd",
+	archive.append(createReadStream(path.join(dist, "alienmind-livecam-m4l.amxd")), {
+		name: "LiveCam/alienmind-livecam-m4l.amxd",
 	});
 	for (const installer of ["install-windows.ps1", "install-mac.sh", "install-linux.sh"]) {
 		archive.file(path.join(root, "scripts", installer), { name: installer, mode: 0o755 });
