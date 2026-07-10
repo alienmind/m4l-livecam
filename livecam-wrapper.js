@@ -17,9 +17,10 @@ autowatch = 1;
 inlets = 1;
 outlets = 2;
 
-// Liveness banner — prints the moment the script (re)loads. If you don't see
-// this in the Max Console, the [js wrapper.js] object isn't in the device.
-post("wrapper.js loaded\n");
+// Liveness banner — prints the moment the script (re)loads. The version tag
+// distinguishes this script from any stale wrapper.js an old device instance
+// might still be running (Live embeds M4L device state in the set).
+post("livecam-wrapper.js v2 (embedded UI payload) loaded\n");
 
 var isArmed = 0;
 var isPlaying = 0;
@@ -97,6 +98,7 @@ var UI_NAME = "livecam-ui.html";
 
 function resolveUiUrl() {
 	var fp = this.patcher.filepath;
+	post("livecam: device file is " + fp + "\n");
 	var devFolder = fp && fp.length ? fp.replace(/\/[^\/]*$/, "") : null;
 	if (!devFolder) {
 		post("livecam: patcher not saved yet - UI path unknown\n");
