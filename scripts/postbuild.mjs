@@ -29,8 +29,8 @@ execFileSync(process.execPath, [
 ], { stdio: "inherit" });
 
 // 3. Copy wrapper.js from root (source file, not in dist/ anymore)
-await copyFile(path.join(root, "wrapper.js"), path.join(dist, "wrapper.js"));
-console.log("postbuild: wrapper.js → dist/wrapper.js");
+await copyFile(path.join(root, "livecam-wrapper.js"), path.join(dist, "livecam-wrapper.js"));
+console.log("postbuild: livecam-wrapper.js → dist/livecam-wrapper.js");
 
 // 4. Build static docs site
 await buildDocs(root);
